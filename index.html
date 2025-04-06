@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cosmic Explorer</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            overflow: hidden;
+            background: linear-gradient(to bottom, #000428, #004e92);
+            font-family: 'Arial', sans-serif;
+            cursor: crosshair;
+        }
+
+        .universe {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        .stars {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .star {
+            position: absolute;
+            background-color: white;
+            border-radius: 50%;
+            animation: twinkle var(--duration) infinite ease-in-out;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.2; }
+            50% { opacity: 1; }
+        }
+
+        .planet {
+            position: absolute;
+            border-radius: 50%;
+            box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.5);
+        }
+
+        #planet1 {
+            width: 150px;
+            height: 150px;
+            background: linear-gradient(45deg, #ff9a9e, #fad0c4);
+            top: 20%;
+            left: 15%;
+            animation: float 15s infinite ease-in-out;
+        }
+
+        #planet2 {
+            width: 200px;
+            height: 200px;
+            background: linear-gradient(45deg, #a1c4fd, #c2e9fb);
+            bottom: 10%;
+            right: 20%;
+            animation: float 20s infinite ease-in-out reverse;
+        }
+
+        #planet3 {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(45deg, #ffecd2, #fcb69f);
+            top: 50%;
+            left: 70%;
+            animation: float 12s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-30px) rotate(5deg); }
+        }
+
+        .spaceship {
+            position: absolute;
+            width: 80px;
+            height: 40px;
+            background: linear-gradient(45deg, #ff512f, #dd2476);
+            border-radius: 50% 50% 0 0;
+            transform: rotate(0deg);
+            transition: transform 0.3s ease;
+            z-index: 10;
+            top: 50%;
+            left: 50%;
+        }
+
+        .spaceship::before {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 30px;
+            background: #ffcc00;
+            border-radius: 50%;
+            bottom: -15px;
+            left: 30px;
+            box-shadow: 0 0 20px 5px #ff6600;
+            animation: pulse 0.5s infinite alternate;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.8; }
+            100% { transform: scale(1.1); opacity: 1; }
+        }
+
+        .comet {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: linear-gradient(to right, transparent, #ffffff);
+            border-radius: 50% 0 0 50%;
+            animation: cometFly 15s linear infinite;
+            opacity: 0;
+        }
+
+        @keyframes cometFly {
+            0% { transform: translate(0, 0); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translate(-1000px, 500px); opacity: 0; }
+        }
+
+        .title {
+            position: absolute;
+            top: 20px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            color: white;
+            font-size: 3rem;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            z-index: 100;
+            opacity: 0;
+            animation: fadeIn 2s forwards 1s;
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 0.8; }
+        }
+
+        .controls {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1rem;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+    <div class="universe">
+        <h1 class="title">Cosmic Explorer</h1>
+        <div class="stars" id="stars"></div>
+        <div class="planet" id="planet1"></div>
+        <div class="planet" id="planet2"></div>
+        <div class="planet" id="planet3"></div>
+        <div class="spaceship" id="spaceship"></div>
+        <div class="comet" id="comet"></div>
+        <div class="controls">Use your mouse to fly the spaceship</div>
+    </div>
+
+    <script>
+        // Create stars
+        const starsContainer = document.getElementById('stars');
+        for (let i = 0; i < 200; i++) {
+            const star = document.createElement('div');
+            star.classList.add('star');
+            star.style.width = `${Math.random() * 3}px`;
+            star.style.height = star.style.width;
+            star.style.left = `${Math.random() * 100}%`;
+            star.style.top = `${Math.random() * 100}%`;
+            star.style.setProperty('--duration', `${2 + Math.random() * 3}s`);
+            starsContainer.appendChild(star);
+        }
+
+        // Spaceship control
+        const spaceship = document.getElementById('spaceship');
+        const universe = document.querySelector('.universe');
+
+        universe.addEventListener('mousemove', (e) => {
+            const x = e.clientX;
+            const y = e.clientY;
+            
+            // Move spaceship
+            spaceship.style.left = `${x - 40}px`;
+            spaceship.style.top = `${y - 20}px`;
+            
+            // Rotate spaceship towards cursor
+            const centerX = x - (parseInt(spaceship.style.left) + 40);
+            const centerY = y - (parseInt(spaceship.style.top) + 20);
+            const angle = Math.atan2(centerY, centerX) * 180 / Math.PI;
+            spaceship.style.transform = `rotate(${angle + 90}deg)`;
+        });
+
+        // Create random comets
+        setInterval(() => {
+            const comet = document.createElement('div');
+            comet.classList.add('comet');
+            comet.style.left = `${100 + Math.random() * 500}px`;
+            comet.style.top = `${-50 - Math.random() * 100}px`;
+            comet.style.width = `${3 + Math.random() * 7}px`;
+            comet.style.height = comet.style.width;
+            comet.style.animationDuration = `${10 + Math.random() * 10}s`;
+            universe.appendChild(comet);
+            
+            // Remove comet after animation
+            setTimeout(() => {
+                comet.remove();
+            }, 20000);
+        }, 3000);
+    </script>
+</body>
+</html>
