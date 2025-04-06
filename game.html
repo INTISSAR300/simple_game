@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Developer Portfolio</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Arial', sans-serif;
+            color: white;
+        }
+        
+        #canvas-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+        
+        #ui {
+            position: absolute;
+            bottom: 30px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            z-index: 100;
+            pointer-events: none;
+        }
+        
+        .tech-button {
+            display: inline-block;
+            margin: 0 10px;
+            padding: 12px 25px;
+            background: rgba(0,0,0,0.7);
+            border: 2px solid white;
+            border-radius: 30px;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            pointer-events: auto;
+            transition: all 0.3s;
+        }
+        
+        .tech-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(255,255,255,0.3);
+        }
+        
+        .html-btn { border-color: #e34c26; color: #e34c26; }
+        .css-btn { border-color: #2965f1; color: #2965f1; }
+        .js-btn { border-color: #f0db4f; color: #f0db4f; }
+        .react-btn { border-color: #61dafb; color: #61dafb; }
+        
+        #info-panel {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 400px;
+            background: rgba(0,0,0,0.8);
+            border-radius: 15px;
+            padding: 30px;
+            display: none;
+            z-index: 200;
+            pointer-events: auto;
+        }
+        
+        #info-panel h2 {
+            margin-top: 0;
+            font-size: 24px;
+        }
+        
+        #close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        
+        #loading {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 300;
+        }
+        
+        .loader {
+            border: 5px solid #333;
+            border-top: 5px solid #61dafb;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div id="loading">
+        <div class="loader"></div>
+        <div>Loading 3D Experience...</div>
+    </div>
+
+    <div id="canvas-container"></div>
+    
+    <div id="ui">
+        <button class="tech-button html-btn">HTML</button>
+        <button class="tech-button css-btn">CSS</button>
+        <button class="tech-button js-btn">JavaScript</button>
+        <button class="tech-button react-btn">React</button>
+    </div>
+    
+    <div id="info-panel">
+        <button id="close-btn">✕</button>
+        <h2 id="panel-title">HTML</h2>
+        <div id="panel-content">
+            <p>HTML (HyperText Markup Language) is the standard markup language for creating web pages.</p>
+            <p>Key features:</p>
+            <ul>
+                <li>Structure web content</li>
+                <li>Semantic elements</li>
+                <li>Accessibility support</li>
+            </ul>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/loaders/GLTFLoader.js"></script>
+    <script>
+        // Wait for everything to load
+        window.addEventListener('load', init);
+        
+        let scene, camera, renderer, controls;
+        let techObjects = [];
+        
+        function init() {
+            // Create scene
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x111122);
+            
+            // Create camera
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 5;
+            
+            // Create renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.getElementById('canvas-container').appendChild(renderer.domElement);
+            
+            // Add controls
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.minDistance = 3;
+            controls.maxDistance = 15;
+            
+            // Add lights
+            const ambientLight = new THREE.AmbientLight(0x404040);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+            directionalLight.position.set(1, 1, 1);
+            scene.add(directionalLight);
+            
+            // Create tech objects
+            createTechWorld();
+            
+            // Handle window resize
+            window.addEventListener('resize', onWindowResize);
+            
+            // Setup UI events
+            setupUI();
+            
+            // Hide loading screen
+            setTimeout(() => {
+                document.getElementById('loading').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('loading').style.display = 'none';
+                }, 500);
+            }, 1500);
+            
+            // Start animation loop
+            animate();
+        }
+        
+        function createTechWorld() {
+            // Colors for different tech
+            const colors = {
+                html: 0xe34c26,
+                css: 0x2965f1,
+                js: 0xf0db4f,
+                react: 0x61dafb
+            };
+            
+            // Create floating tech objects
+            const techTypes = ['html', 'css', 'js', 'react'];
+            
+            techTypes.forEach((tech, index) => {
+                // Create different shapes for each tech
+                let geometry;
+                switch(index % 4) {
+                    case 0: geometry = new THREE.BoxGeometry(0.8, 0.8, 0.8); break;
+                    case 1: geometry = new THREE.SphereGeometry(0.5, 32, 32); break;
+                    case 2: geometry = new THREE.ConeGeometry(0.5, 1, 32); break;
+                    case 3: geometry = new THREE.TorusGeometry(0.5, 0.2, 16, 32); break;
+                }
+                
+                const material = new THREE.MeshPhongMaterial({ 
+                    color: colors[tech],
+                    emissive: colors[tech],
+                    emissiveIntensity: 0.2,
+                    shininess: 100
+                });
+                
+                const mesh = new THREE.Mesh(geometry, material);
+                
+                // Position in a circle
+                const angle = (index / techTypes.length) * Math.PI * 2;
+                mesh.position.x = Math.cos(angle) * 3;
+                mesh.position.z = Math.sin(angle) * 3;
+                mesh.position.y = (Math.random() - 0.5) * 2;
+                
+                // Add animation properties
+                mesh.userData = {
+                    tech: tech,
+                    speed: Math.random() * 0.02 + 0.01,
+                    angle: Math.random() * Math.PI * 2,
+                    radius: 0.5 + Math.random() * 0.5,
+                    height: mesh.position.y,
+                    originalY: mesh.position.y
+                };
+                
+                scene.add(mesh);
+                techObjects.push(mesh);
+            });
+            
+            // Add floating code particles
+            for (let i = 0; i < 100; i++) {
+                const size = Math.random() * 0.1 + 0.05;
+                const geometry = new THREE.BoxGeometry(size, size, size);
+                const material = new THREE.MeshBasicMaterial({ 
+                    color: 0xffffff,
+                    transparent: true,
+                    opacity: 0.7
+                });
+                const particle = new THREE.Mesh(geometry, material);
+                
+                particle.position.x = (Math.random() - 0.5) * 20;
+                particle.position.y = (Math.random() - 0.5) * 20;
+                particle.position.z = (Math.random() - 0.5) * 20;
+                
+                particle.userData = {
+                    speed: Math.random() * 0.02 + 0.01,
+                    direction: new THREE.Vector3(
+                        Math.random() - 0.5,
+                        Math.random() - 0.5,
+                        Math.random() - 0.5
+                    ).normalize()
+                };
+                
+                scene.add(particle);
+            }
+        }
+        
+        function setupUI() {
+            // Tech buttons
+            document.querySelector('.html-btn').addEventListener('click', () => showTechInfo('HTML'));
+            document.querySelector('.css-btn').addEventListener('click', () => showTechInfo('CSS'));
+            document.querySelector('.js-btn').addEventListener('click', () => showTechInfo('JavaScript'));
+            document.querySelector('.react-btn').addEventListener('click', () => showTechInfo('React'));
+            
+            // Close button
+            document.getElementById('close-btn').addEventListener('click', () => {
+                document.getElementById('info-panel').style.display = 'none';
+            });
+        }
+        
+        function showTechInfo(tech) {
+            const panel = document.getElementById('info-panel');
+            const title = document.getElementById('panel-title');
+            const content = document.getElementById('panel-content');
+            
+            title.textContent = tech;
+            
+            // Update content based on tech
+            let techContent = '';
+            switch(tech) {
+                case 'HTML':
+                    techContent = `
+                        <p>HTML (HyperText Markup Language) is the standard markup language for creating web pages.</p>
+                        <p>Key features:</p>
+                        <ul>
+                            <li>Structure web content</li>
+                            <li>Semantic elements</li>
+                            <li>Accessibility support</li>
+                        </ul>
+                    `;
+                    break;
+                case 'CSS':
+                    techContent = `
+                        <p>CSS (Cascading Style Sheets) describes how HTML elements are displayed.</p>
+                        <p>Key features:</p>
+                        <ul>
+                            <li>Responsive design</li>
+                            <li>Animations and transitions</li>
+                            <li>Flexbox and Grid layouts</li>
+                        </ul>
+                    `;
+                    break;
+                case 'JavaScript':
+                    techContent = `
+                        <p>JavaScript is the programming language of the web.</p>
+                        <p>Key features:</p>
+                        <ul>
+                            <li>Client-side interactivity</li>
+                            <li>Asynchronous programming</li>
+                            <li>Extensive ecosystem</li>
+                        </ul>
+                    `;
+                    break;
+                case 'React':
+                    techContent = `
+                        <p>React is a JavaScript library for building user interfaces.</p>
+                        <p>Key features:</p>
+                        <ul>
+                            <li>Component-based architecture</li>
+                            <li>Virtual DOM</li>
+                            <li>Hooks API</li>
+                        </ul>
+                    `;
+                    break;
+            }
+            
+            content.innerHTML = techContent;
+            panel.style.display = 'block';
+            
+            // Highlight corresponding 3D object
+            techObjects.forEach(obj => {
+                if (obj.userData.tech.toLowerCase() === tech.toLowerCase()) {
+                    obj.material.emissiveIntensity = 0.8;
+                    setTimeout(() => {
+                        obj.material.emissiveIntensity = 0.2;
+                    }, 1000);
+                }
+            });
+        }
+        
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+        
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // Animate tech objects
+            techObjects.forEach(obj => {
+                obj.userData.angle += obj.userData.speed;
+                obj.position.x = Math.cos(obj.userData.angle) * obj.userData.radius;
+                obj.position.z = Math.sin(obj.userData.angle) * obj.userData.radius;
+                obj.position.y = obj.userData.originalY + Math.sin(Date.now() * 0.001) * 0.5;
+                obj.rotation.x += obj.userData.speed * 0.5;
+                obj.rotation.y += obj.userData.speed * 0.5;
+            });
+            
+            // Update controls
+            controls.update();
+            
+            // Render scene
+            renderer.render(scene, camera);
+        }
+    </script>
+</body>
+</html>

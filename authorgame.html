@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Quest: Web Dev Adventure</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;700&family=Press+Start+2P&display=swap');
+        
+        :root {
+            --html-color: #e34c26;
+            --css-color: #2965f1;
+            --js-color: #f0db4f;
+            --bootstrap-color: #7952b3;
+            --tailwind-color: #38b2ac;
+            --react-color: #61dafb;
+        }
+        
+        body {
+            margin: 0;
+            height: 100vh;
+            overflow: hidden;
+            background: #1a1a2e;
+            font-family: 'Source Code Pro', monospace;
+            color: #f8f8f8;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .game-container {
+            display: flex;
+            height: 100%;
+        }
+
+        /* Sidebar - Inventory */
+        .sidebar {
+            width: 250px;
+            background: #16213e;
+            padding: 20px;
+            border-right: 2px solid #0f3460;
+            overflow-y: auto;
+        }
+
+        .tech-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            margin: 5px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .html-badge { background: var(--html-color); }
+        .css-badge { background: var(--css-color); }
+        .js-badge { background: var(--js-color); color: #333; }
+        .bootstrap-badge { background: var(--bootstrap-color); }
+        .tailwind-badge { background: var(--tailwind-color); color: #333; }
+        .react-badge { background: var(--react-color); color: #333; }
+
+        /* Main Game Area */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            position: relative;
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #4a4a6a;
+        }
+
+        .game-title {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.5rem;
+            color: #00d1b2;
+            margin: 0;
+        }
+
+        .level-indicator {
+            background: #4a4a6a;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
+        .game-area {
+            flex: 1;
+            background: #0f3460;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .code-editor {
+            background: #1e1e2e;
+            border-radius: 6px;
+            padding: 15px;
+            font-family: 'Source Code Pro', monospace;
+            height: 200px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            border: 1px solid #4a4a6a;
+        }
+
+        .code-line {
+            margin-bottom: 5px;
+            white-space: pre;
+        }
+
+        .comment { color: #6a9955; }
+        .tag { color: #569cd6; }
+        .attribute { color: #9cdcfe; }
+        .value { color: #ce9178; }
+        .string { color: #ce9178; }
+        .keyword { color: #c586c0; }
+        .function { color: #dcdcaa; }
+
+        .challenge-prompt {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border-left: 4px solid #00d1b2;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            font-family: 'Source Code Pro', monospace;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-run {
+            background: #00d1b2;
+            color: #000;
+        }
+
+        .btn-run:hover {
+            background: #00b89c;
+        }
+
+        .btn-hint {
+            background: #4a4a6a;
+            color: #fff;
+        }
+
+        .btn-hint:hover {
+            background: #5a5a7a;
+        }
+
+        .btn-next {
+            background: #7952b3;
+            color: #fff;
+        }
+
+        .btn-next:hover {
+            background: #8a63c4;
+        }
+
+        /* Character */
+        .character {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 100px;
+            height: 150px;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 150"><circle cx="50" cy="30" r="20" fill="%23f8f8f8"/><rect x="30" y="50" width="40" height="60" fill="%234a4a6a"/><rect x="20" y="50" width="10" height="40" fill="%234a4a6a"/><rect x="70" y="50" width="10" height="40" fill="%234a4a6a"/><rect x="35" y="110" width="10" height="30" fill="%234a4a6a"/><rect x="55" y="110" width="10" height="30" fill="%234a4a6a"/></svg>');
+            background-repeat: no-repeat;
+            transition: transform 0.3s;
+        }
+
+        .character:hover {
+            transform: translateY(-10px);
+        }
+
+        /* Progress Bars */
+        .progress-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .progress-bar {
+            flex: 1;
+            height: 10px;
+            background: #4a4a6a;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            transition: width 0.5s;
+        }
+
+        .html-progress { background: var(--html-color); width: 20%; }
+        .css-progress { background: var(--css-color); width: 15%; }
+        .js-progress { background: var(--js-color); width: 10%; }
+        .bootstrap-progress { background: var(--bootstrap-color); width: 5%; }
+        .tailwind-progress { background: var(--tailwind-color); width: 5%; }
+        .react-progress { background: var(--react-color); width: 0%; }
+
+        /* Floating Tech Icons */
+        .tech-icon {
+            position: absolute;
+            font-size: 2rem;
+            opacity: 0.7;
+            animation: float 10s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
+        }
+
+        /* Terminal Effect */
+        .terminal-effect {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(26, 26, 46, 0.8),
+                rgba(26, 26, 46, 0.8) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="sidebar">
+            <h3>Tech Inventory</h3>
+            <div class="tech-badge html-badge">HTML</div>
+            <div class="tech-badge css-badge">CSS</div>
+            <div class="tech-badge js-badge">JavaScript</div>
+            
+            <h3 style="margin-top: 30px;">Skills Progress</h3>
+            <div>HTML <span class="html-progress-value">20%</span></div>
+            <div class="progress-bar"><div class="progress-fill html-progress"></div></div>
+            
+            <div>CSS <span class="css-progress-value">15%</span></div>
+            <div class="progress-bar"><div class="progress-fill css-progress"></div></div>
+            
+            <div>JavaScript <span class="js-progress-value">10%</span></div>
+            <div class="progress-bar"><div class="progress-fill js-progress"></div></div>
+            
+            <div>Bootstrap <span class="bootstrap-progress-value">5%</span></div>
+            <div class="progress-bar"><div class="progress-fill bootstrap-progress"></div></div>
+            
+            <div>Tailwind <span class="tailwind-progress-value">5%</span></div>
+            <div class="progress-bar"><div class="progress-fill tailwind-progress"></div></div>
+            
+            <div>React <span class="react-progress-value">0%</span></div>
+            <div class="progress-bar"><div class="progress-fill react-progress"></div></div>
+            
+            <h3 style="margin-top: 30px;">Quests Completed</h3>
+            <div class="quests-list">
+                <div class="quest">✓ Create first HTML page</div>
+                <div class="quest">✓ Style with basic CSS</div>
+                <div class="quest">✗ Make page interactive</div>
+                <div class="quest">✗ Build responsive layout</div>
+                <div class="quest">✗ Create React component</div>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="game-header">
+                <h1 class="game-title">CODE QUEST</h1>
+                <div class="level-indicator">Level: Novice Coder</div>
+            </div>
+            
+            <div class="game-area">
+                <!-- Floating Tech Icons -->
+                <div class="tech-icon" style="top: 10%; left: 10%;">{"⚛️"}</div>
+                <div class="tech-icon" style="top: 30%; right: 15%;">{"</>"}</div>
+                <div class="tech-icon" style="bottom: 20%; left: 20%;">{"{}"}</div>
+                
+                <div class="challenge-prompt">
+                    <h3>Challenge #3: Center a Div</h3>
+                    <p>The ancient scroll of CSS says: "To truly master web development, one must first learn to center a div."</p>
+                    <p>Complete the code below to center the blue box both horizontally and vertically.</p>
+                </div>
+                
+                <div class="code-editor">
+                    <div class="code-line"><span class="comment">&lt;!-- HTML --&gt;</span></div>
+                    <div class="code-line"><span class="tag">&lt;div</span> <span class="attribute">class</span>=<span class="value">"container"</span><span class="tag">&gt;</span></div>
+                    <div class="code-line">  <span class="tag">&lt;div</span> <span class="attribute">class</span>=<span class="value">"box"</span><span class="tag">&gt;</span>I should be centered!<span class="tag">&lt;/div&gt;</span></div>
+                    <div class="code-line"><span class="tag">&lt;/div&gt;</span></div>
+                    <div class="code-line"><br></div>
+                    <div class="code-line"><span class="comment">/* CSS */</span></div>
+                    <div class="code-line"><span class="tag">.container</span> {</div>
+                    <div class="code-line">  <span class="attribute">width</span>: <span class="value">100%</span>;</div>
+                    <div class="code-line">  <span class="attribute">height</span>: <span class="value">300px</span>;</div>
+                    <div class="code-line">  <span class="attribute">border</span>: <span class="value">1px dashed #ccc</span>;</div>
+                    <div class="code-line">  <span class="comment">/* Your code here */</span></div>
+                    <div class="code-line">}</div>
+                    <div class="code-line"><br></div>
+                    <div class="code-line"><span class="tag">.box</span> {</div>
+                    <div class="code-line">  <span class="attribute">width</span>: <span class="value">100px</span>;</div>
+                    <div class="code-line">  <span class="attribute">height</span>: <span class="value">100px</span>;</div>
+                    <div class="code-line">  <span class="attribute">background</span>: <span class="value">#2965f1</span>;</div>
+                    <div class="code-line">  <span class="attribute">color</span>: <span class="value">white</span>;</div>
+                    <div class="code-line">  <span class="attribute">padding</span>: <span class="value">10px</span>;</div>
+                    <div class="code-line">}</div>
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="btn btn-run">Run Code</button>
+                    <button class="btn btn-hint">Get Hint</button>
+                    <button class="btn btn-next">Next Challenge</button>
+                </div>
+                
+                <div class="character"></div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="terminal-effect"></div>
+    
+    <script>
+        // Game logic would go here
+        document.querySelector('.btn-run').addEventListener('click', function() {
+            alert('Running code... Checking solution!');
+            // In a real game, this would validate the code and update progress
+        });
+        
+        document.querySelector('.btn-hint').addEventListener('click', function() {
+            alert('Hint: Try using Flexbox properties like display, justify-content and align-items');
+        });
+        
+        document.querySelector('.btn-next').addEventListener('click', function() {
+            alert('Moving to next challenge: Building a responsive navbar!');
+            // In a real game, this would load the next challenge
+        });
+    </script>
+</body>
+</html>
